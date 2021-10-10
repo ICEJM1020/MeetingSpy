@@ -1,0 +1,5 @@
+models	Decision Tree	Random Forest	Adaboost(DecisionStump)	Adaboost(Perceptron)	Adaboost(DecisionTree)
+10-folds cross Val Acc	74.95%	93.49%	91.62%	81.10%	92.57%
+Precision	61.37%	98.97%	99.59%	79.95%	91.84%
+Recall	0.789	0.969	0.977	0.799	0.947
+F-measure	0.691	0.979	0.986	0.799	0.932
