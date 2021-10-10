@@ -1,0 +1,149 @@
+<head></head>
+<body>
+	<div id="container" style="min-width:100%;height:100%"></div>
+	<!---->
+	<script src='https://code.highcharts.com.cn/highcharts/highcharts.js'></script>
+	<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+	<script src='http://img.hcharts.cn/highcharts/themes/dark-unica.js'></script>
+
+	<script src='qwebchannel.js'></script>
+	<script>
+		var bridge;
+		var dataset = { "relaxed": 0, "anxious": 0, "distracted": 0 };
+        var valanxious;
+        var valrelaxed;
+        var valdistracted;
+		var valgetdata;
+		var repaintgap=1000;
+
+		Highcharts.setOptions({
+			global: {
+				useUTC: false
+			}
+		});
+		new QWebChannel(qt.webChannelTransport, function (channel) {
+			if (typeof channel == 'undefined') {
+				alert("no channel");
+			}
+			else {
+				bridge = channel.objects.StatusLineBridge;  //从通道中获取交互对象
+			}
+		})
+
+		valgetdata = setInterval(function () {
+			getData();
+		}, 1000);
+
+		var chart = Highcharts.chart('container', {
+			chart: {
+				type: 'spline',
+				marginRight: 10,
+				events: {
+					load: function () {
+						var series1 = this.series[0],
+							series2 = this.series[1],
+							series3 = this.series[2],
+							chart = this;
+						valrelaxed = setInterval(function () {
+                            if (dataset["relaxed"] === 0) {
+
+							}
+							else {
+                                var x = (new Date()).getTime(),
+                                    y = dataset["relaxed"]*100;
+                                dataset["relaxed"] = 0;
+                                series1.addPoint([x, y], true);
+                            }
+                        }, repaintgap);
+						valanxious = setInterval(function () {
+                            if (dataset["anxious"] === 0) {
+
+							}
+							else {
+								var x = (new Date()).getTime(),
+                                    y = dataset["anxious"] * 100;
+								dataset["anxious"] = 0;
+								series2.addPoint([x, y], true);
+							}
+                        }, repaintgap);
+						valdistracted = setInterval(function () {
+                            if (dataset["distracted"] === 0) {
+
+							}
+							else {
+								var x = (new Date()).getTime(),
+                                    y = dataset["distracted"] * 100;
+								dataset["distracted"] = 0;
+								series3.addPoint([x, y], true);
+							}
+                        }, repaintgap);
+					}
+				}
+			},
+			title: {
+				text: 'Status Line'
+			},
+			xAxis: {
+				type: 'datetime',
+				tickPixelInterval: 150
+			},
+			yAxis: {
+				title: {
+					text: null
+				}
+			},
+			tooltip: {
+				formatter: function () {
+					return '<b>' + this.series.name + '</b><br/>' +
+						Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+						Highcharts.numberFormat(this.y, 2);
+				}
+			},
+			legend: {
+				enabled: false
+			},
+			series: [
+				{
+					name: 'relaxed',
+					data: []
+				},
+				{
+					name: 'anxious',
+					data: []
+				},
+				{
+					name: 'distracted',
+					data: []
+				}
+			]
+		});
+
+		function getData() {
+			if (typeof bridge == 'undefined') {
+				alert("no bridge");
+			}
+			else {
+				bridge.feedback_s();
+			}
+		}
+
+		function recvData(p1, p2, p3) {
+			var status = (dataset["anxious"] === 0);
+			dataset["anxious"] += parseFloat(p1);
+			dataset["relaxed"] += parseFloat(p2);
+			dataset["distracted"] += parseFloat(p3);
+			if (!status) {
+                dataset["anxious"] /= 2;
+                dataset["relaxed"] /= 2;
+                dataset["distracted"] /= 2;
+            }
+		}
+
+		function StopInterval() {
+			clearInterval(valanxious);
+			clearInterval(valgetdata);
+			clearInterval(valrelaxed);
+			clearInterval(valdistracted);
+		}
+	</script>
+</body>

@@ -1,0 +1,116 @@
+<head></head>
+<body>
+    <div id="container" style="min-width:100%;height:100%"></div>
+    <script src='https://code.highcharts.com.cn/highcharts/highcharts.js'></script>
+    <script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+    <script src='http://img.hcharts.cn/highcharts/themes/dark-unica.js'></script>
+    
+    <script src='qwebchannel.js'></script>
+    <script>
+    var bridge;
+    var dataset = { "relaxed": 0, "anxious": 0, "distracted": 0 };
+    Highcharts.setOptions({
+	global: {
+		useUTC: false
+	}
+    });
+
+    new QWebChannel(qt.webChannelTransport, function (channel) {
+        if (typeof channel == 'undefined') {
+            alert("no channel");
+        }
+        else {
+			bridge = channel.objects.StatusBarBridge;
+        }
+    })
+
+    var valgetdata = setInterval(function () {
+        getData();
+    }, 1000);
+
+    var chart = Highcharts.chart('container', {
+		chart: {
+			type: 'column',
+			events:{
+				load: function () {
+					valprint = setInterval(function () {
+                        var x1 = dataset["anxious"],
+                            x2 = dataset["relaxed"],
+                            x3 = dataset["distracted"]
+						chart.update({
+							series: [{
+                                data: [x1,x2,x3],
+                                colorByPoint: true,
+                                colors: ['#6BC235', '#FF425D', '#24A9E1'],
+                                dataLabels: {
+                                    enabled: true,
+                                    rotation: 0,
+                                    color: ['#FFFFFF'],
+                                    align: 'center',
+                                    format: '{point.y:.3f}', // :.1f 为保留 1 位小数
+                                    y: 25
+                                }
+                            }]
+                        })
+					}, 1000);
+				}
+			}
+		},
+		title: {
+			text: 'Current Status'
+		},
+		xAxis: {
+			type: 'category',
+            categories: ["Anxious", "Relaxed", "Distracted"]
+		},
+		yAxis: {
+			min: 0,
+			title: {
+				text: 'Percent'
+			}
+		},
+		legend: {
+			enabled: false
+		},
+		tooltip: {
+			pointFormat: 'Percent: <b>{point.y:.1f} %</b>'
+		},
+		series: [
+			{
+				data: [0,0,0],
+				colorByPoint: true,
+				colors: ['#6BC235','#FF425D','#24A9E1'],
+				dataLabels: {
+					enabled: true,
+					rotation: 0,
+					color: ['#FFFFFF'],
+					align: 'center',
+					format: '{point.y:.3f}', // :.1f 为保留 1 位小数
+					y: 25
+				}
+			},
+		]
+	});
+
+    function recvData(p1, p2, p3) {
+		var status = (dataset["anxious"] === 0);
+        dataset["anxious"] += parseFloat(p1);
+        dataset["relaxed"] += parseFloat(p2);
+        dataset["distracted"] += parseFloat(p3);
+        if (!status) {
+            dataset["anxious"] /= 2;
+            dataset["relaxed"] /= 2;
+            dataset["distracted"] /= 2;
+        }
+    }
+
+    function getData() {
+        if (typeof bridge == 'undefined') {
+            alert("no bridge");
+        }
+		else {
+			bridge.feedback_a();
+        }
+    }
+    </script>
+</body>
