@@ -2,6 +2,10 @@
 
 Monitor attendants status through face emotion and upper body key point and give feedbacks. It's a reproduction of a paper of CSCW 2019, *[How Presenters Perceive and React to Audience Flow Prediction In-situ: An Explorative Study of Live Online Lecture](https://dl.acm.org/doi/10.1145/3359264)*. 
 
+It aims to get audiences' upper joint points and emotion points, and computed by ML algorithm and give online meeting's holder a feedback of the online meeting. It can help both meeting holder and audiences have a better online experience, especially for MOOCs.(i.e. teachers can change his pace of speeches and repeat some difficult part by get a status of high anxious.) 
+
+<div align=center><img src="img/flow.png" width="80%"  /></div>
+
 In the previous research, it shows that if MOOCs' lectures can get a realtime feedbacks in the class, it will help both studsents and teachers improve the effect of the online-class.  Previous model is based on emotion expression and face-keypoint, using Vote(average probabilities) with Decision Tree(C4.5), SVM(RBFKernel), and Multilayer Perceptron(2 hidden layers). The output is 3 dimension of evoluation, anxiety, flow, and boredom. 
 
 My work can be departed into two steps: (1)plus the upper body joint keyt point as input; (2)change the status evaluation models tp Adaboost and Random Forest.
